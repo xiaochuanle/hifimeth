@@ -32,7 +32,7 @@ pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv t
 ### Step 2: Install `GCN5mc`
 
 ``` shell
-git clone
+git clone https://github.com/xiaochuanle/gcn5mc.git
 cd gcn5mc
 ./install_cpp_tools.sh
 cd ..
@@ -73,7 +73,7 @@ There are three using cases.
 
 ```shell
 $ /data1/chenying/bs3/gcn5mc/src/scripts/gcn5mc.sh \
-	--src /data1/chenying/bs3/gcn5mc \
+    --src /data1/chenying/bs3/gcn5mc \
     --num_threads 48 \
     --model_path /data1/chenying/bs3/gcn5mc/models/gcn5mc-mol-k400.ckpt \
     --input /data1/chenying/bs3/gcn5mc/examples/chr1-reads.bam \
@@ -114,13 +114,13 @@ Each calling result ocupies one line and contains five colummns:
 Step 1: map the bam to a reference:
 ``` shell
 pbmm2 align --preset CCS --sort GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
-	/data1/chenying/bs3/gcn5mc/examples/chr1-reads.bam chr1-reads-grch38.bam
+    /data1/chenying/bs3/gcn5mc/examples/chr1-reads.bam chr1-reads-grch38.bam
 ```
 
 Step 2: call 5mc with the mapped bam:
 ```shell
 /data1/chenying/bs3/gcn5mc/src/scripts/gcn5mc.sh \
-	--src /data1/chenying/bs3/gcn5mc \
+    --src /data1/chenying/bs3/gcn5mc \
     --model_path /data1/chenying/bs3/gcn5mc/models/gcn5mc-mol-k400.ckpt \
     --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
     --input chr1-reads-grch38.bam \
@@ -162,7 +162,7 @@ Step 3: call modification frequencies
 
 ``` shell
 /data1/chenying/bs3/gcn5mc/src/scripts/gcn5mc-freq.sh \
-	--src /data1/chenying/bs3/gcn5mc \
+    --src /data1/chenying/bs3/gcn5mc \
     --model_path /data1/chenying/bs3/gcn5mc/models/gcn5mc-freq-s11.ckpt \
     --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
     --num_threads 48 \
@@ -195,13 +195,13 @@ Using `freq-call-grch38/freq-call.count.txt` for subsequent analysis is recomman
 Step 1: map the bam to a reference:
 ``` shell
 pbmm2 align --preset CCS --sort GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
-	/data1/chenying/bs3/gcn5mc/examples/chr1-reads.bam chr1-reads-grch38.bam
+    /data1/chenying/bs3/gcn5mc/examples/chr1-reads.bam chr1-reads-grch38.bam
 ```
 
 Step 2: call 5mc with the mapped bam:
 ```shell
 /data1/chenying/bs3/gcn5mc/src/scripts/gcn5mc.sh \
-	--src /data1/chenying/bs3/gcn5mc \
+    --src /data1/chenying/bs3/gcn5mc \
     --model_path /data1/chenying/bs3/gcn5mc/models/gcn5mc-mol-k400.ckpt \
     --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
     --input chr1-reads-grch38.bam \
@@ -216,7 +216,7 @@ Step 3: add haplotypes to the bam:
 ``` shell
 $ samtools index -@8 5mc-call-grch38/5mc-call.bam
 $ whatshap haplotag --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
-	--ignore-read-groups \
+    --ignore-read-groups \
     --o 5mc-call-grch38/5mc-call-tag.bam \
     HG002_NA24385_GRCh38_1_22_v4.2_benchmark_phased_StrandSeq_whatshap.vcf.gz \
     5mc-call-grch38/5mc-call.bam
@@ -226,7 +226,7 @@ Step 4: calling modification frequencies on the taged bam:
 
 ```shell
 /data1/chenying/bs3/gcn5mc/src/scripts/gcn5mc-freq.sh \
-	--src /data1/chenying/bs3/gcn5mc \
+    --src /data1/chenying/bs3/gcn5mc \
     --model_path /data1/chenying/bs3/gcn5mc/models/gcn5mc-freq-s11.ckpt \
     --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
     --num_threads 48 --bam 5mc-call-grch38/5mc-call-tag.bam \
