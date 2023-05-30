@@ -1,11 +1,11 @@
 # Introduction
 
-GCN5mc is a deep neural network model for calling 5mc for PacBio HiFi reads.
+hifimeth is a deep neural network model for calling 5mc for PacBio HiFi reads.
 
-1. At single-molecule resolution, GCN5mc achieves F1-score over 94% and AUC over 99%
-2. Calling modification frequencies genomoe, GCN5mc achieves correlation with BS-seq results over 0.9 with counting mode.
-3. GCN5mc is built upon the [graph neural network operator](https://arxiv.org/abs/1810.02244) that implemented in the [PyG](https://pytorch-geometric.readthedocs.io/en/latest/index.html) library.
-4. A GPU accelerator is required to run GNC5mc
+1. At single-molecule resolution, hifimeth achieves F1-score over 94% and AUC over 99%
+2. Calling modification frequencies genomo-wide, hifimeth achieves correlation with BS-seq results over 0.9 with counting mode.
+3. hifimeth is built upon the [graph neural network operator](https://arxiv.org/abs/1810.02244) that implemented in the [PyG](https://pytorch-geometric.readthedocs.io/en/latest/index.html) library.
+4. A GPU accelerator is required to run hifimeth
 
 ## Installation
 
@@ -13,27 +13,27 @@ GCN5mc is a deep neural network model for calling 5mc for PacBio HiFi reads.
 
 Install Pytorch with the default conda channel:
 ```shell
-conda create -n gcn5mc python=3.10
-conda activate gcn5mc
+conda create -n hifimeth python=3.10
+conda activate hifimeth
 conda install cudatoolkit=11.7 -c nvidia
 pip install --force-reinstall torch=1.13.1 torchvision=0.14.1 torchaudio=0.13.1 wget https://data.pyg.org/whl/torch-1.13.0+cu117.html
 pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv torch_geometric -f torch-1.13.0+cu117.html
 ```
 Or with the `tuna.tsinghua.edu.cn` channel:
 ```shell
-conda create -n gcn5mc python=3.10 
-conda activate gcn5mc
+conda create -n hifimeth python=3.10 
+conda activate hifimeth
 conda install cudatoolkit=11.7 -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
 pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 pip install --force-reinstall torch=1.13.1 torchvision=0.14.1 torchaudio=0.13.1 wget https://data.pyg.org/whl/torch-1.13.0+cu117.html
 pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv torch_geometric -f torch-1.13.0+cu117.html
 ```
 
-### Step 2: Install `GCN5mc`
+### Step 2: Install `hifimeth`
 
 ``` shell
-git clone https://github.com/xiaochuanle/gcn5mc.git
-cd gcn5mc
+git clone https://github.com/xiaochuanle/hifimeth.git
+cd hifimeth
 ./install_cpp_tools.sh
 cd ..
 ```
@@ -42,14 +42,14 @@ cd ..
 
 ### Prepare data
 
-The `gcn5mc` is downloaded in directory
+The `hifimeth` is downloaded in directory
 ```shell
-/data1/chenying/bs3/gcn5mc/
+/data1/chenying/bs3/hifimeth/
 ```
 
-The reads are found in the source of `gcn5mc`:
+The reads are found in the source of `hifimeth`:
 ```shell
-/data1/chenying/bs3/gcn5mc/examples/chr1-reads.bam
+/data1/chenying/bs3/hifimeth/examples/chr1-reads.bam
 ```
 
 Download the `GRCh38` reference (`pbmm2` does not recognise the `.fna` format):
@@ -72,11 +72,11 @@ There are three using cases.
 ### Case 1: Calling 5mc at single-molecule resolution only.
 
 ```shell
-$ /data1/chenying/bs3/gcn5mc/src/scripts/gcn5mc.sh \
-    --src /data1/chenying/bs3/gcn5mc \
+$ /data1/chenying/bs3/hifimeth/src/scripts/hifimeth.sh \
+    --src /data1/chenying/bs3/hifimeth \
     --num_threads 48 \
-    --model_path /data1/chenying/bs3/gcn5mc/models/gcn5mc-mol-k400.ckpt \
-    --input /data1/chenying/bs3/gcn5mc/examples/chr1-reads.bam \
+    --model_path /data1/chenying/bs3/hifimeth/models/hifimeth-mol-k400.ckpt \
+    --input /data1/chenying/bs3/hifimeth/examples/chr1-reads.bam \
     --out 5mc-call
 ```
 
@@ -87,7 +87,7 @@ $ /data1/chenying/bs3/gcn5mc/src/scripts/gcn5mc.sh \
 5mc-call/5mc-call.txt
 ```
 
-`5mc-call/5mc-call.bam` adds calling results to the input bam `/data1/chenying/bs3/gcn5mc/examples/chr1-reads.bam`.  5mC base modification values are read from the MM and ML auxiliary tags which encode base modifications and confidence values. These tags are further described in the [SAM tag specification document](https://samtools.github.io/hts-specs/SAMtags.pdf).
+`5mc-call/5mc-call.bam` adds calling results to the input bam `/data1/chenying/bs3/hifimeth/examples/chr1-reads.bam`.  5mC base modification values are read from the MM and ML auxiliary tags which encode base modifications and confidence values. These tags are further described in the [SAM tag specification document](https://samtools.github.io/hts-specs/SAMtags.pdf).
 
 `5mc-call/5mc-call.txt` lists calling results in human readable format:
 ```shell
@@ -114,14 +114,14 @@ Each calling result ocupies one line and contains five colummns:
 Step 1: map the bam to a reference:
 ``` shell
 pbmm2 align --preset CCS --sort GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
-    /data1/chenying/bs3/gcn5mc/examples/chr1-reads.bam chr1-reads-grch38.bam
+    /data1/chenying/bs3/hifimeth/examples/chr1-reads.bam chr1-reads-grch38.bam
 ```
 
 Step 2: call 5mc with the mapped bam:
 ```shell
-/data1/chenying/bs3/gcn5mc/src/scripts/gcn5mc.sh \
-    --src /data1/chenying/bs3/gcn5mc \
-    --model_path /data1/chenying/bs3/gcn5mc/models/gcn5mc-mol-k400.ckpt \
+/data1/chenying/bs3/hifimeth/src/scripts/hifimeth.sh \
+    --src /data1/chenying/bs3/hifimeth \
+    --model_path /data1/chenying/bs3/hifimeth/models/hifimeth-mol-k400.ckpt \
     --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
     --input chr1-reads-grch38.bam \
     --out 5mc-call-grch38
@@ -161,9 +161,9 @@ A calling result containing eight colummns also contains mapping info:
 Step 3: call modification frequencies
 
 ``` shell
-/data1/chenying/bs3/gcn5mc/src/scripts/gcn5mc-freq.sh \
-    --src /data1/chenying/bs3/gcn5mc \
-    --model_path /data1/chenying/bs3/gcn5mc/models/gcn5mc-freq-s11.ckpt \
+/data1/chenying/bs3/hifimeth/src/scripts/hifimeth-freq.sh \
+    --src /data1/chenying/bs3/hifimeth \
+    --model_path /data1/chenying/bs3/hifimeth/models/hifimeth-freq-s11.ckpt \
     --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
     --num_threads 48 \
     --bam 5mc-call-grch38/5mc-call.bam \
@@ -195,14 +195,14 @@ Using `freq-call-grch38/freq-call.count.txt` for subsequent analysis is recomman
 Step 1: map the bam to a reference:
 ``` shell
 pbmm2 align --preset CCS --sort GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
-    /data1/chenying/bs3/gcn5mc/examples/chr1-reads.bam chr1-reads-grch38.bam
+    /data1/chenying/bs3/hifimeth/examples/chr1-reads.bam chr1-reads-grch38.bam
 ```
 
 Step 2: call 5mc with the mapped bam:
 ```shell
-/data1/chenying/bs3/gcn5mc/src/scripts/gcn5mc.sh \
-    --src /data1/chenying/bs3/gcn5mc \
-    --model_path /data1/chenying/bs3/gcn5mc/models/gcn5mc-mol-k400.ckpt \
+/data1/chenying/bs3/hifimeth/src/scripts/hifimeth.sh \
+    --src /data1/chenying/bs3/hifimeth \
+    --model_path /data1/chenying/bs3/hifimeth/models/hifimeth-mol-k400.ckpt \
     --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
     --input chr1-reads-grch38.bam \
     --out 5mc-call-grch38
@@ -225,9 +225,9 @@ $ whatshap haplotag --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
 Step 4: calling modification frequencies on the taged bam:
 
 ```shell
-/data1/chenying/bs3/gcn5mc/src/scripts/gcn5mc-freq.sh \
-    --src /data1/chenying/bs3/gcn5mc \
-    --model_path /data1/chenying/bs3/gcn5mc/models/gcn5mc-freq-s11.ckpt \
+/data1/chenying/bs3/hifimeth/src/scripts/hifimeth-freq.sh \
+    --src /data1/chenying/bs3/hifimeth \
+    --model_path /data1/chenying/bs3/hifimeth/models/hifimeth-freq-s11.ckpt \
     --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
     --num_threads 48 --bam 5mc-call-grch38/5mc-call-tag.bam \
     --out freq-call-grch38-tag \
