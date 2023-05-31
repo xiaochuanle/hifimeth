@@ -101,9 +101,9 @@ CluReadSta = CluReadSta.merge(FisherTest.reset_index(), on='BIN').copy()
 CluReadSta.to_csv(f'{PRE}.Bin_CluReadSta.tsv',sep="\t", header=True, index=False)
 
 # Filt unclustered reads for each cluster_bin and assign H and L tag to each bin read
-BinReadRatiosFilt = BinReadRatios.loc[(BinReadRatios.BIN.isin(Bincluster.BIN)) & ((BinReadRatios.ReadBinRatioDiff>=0.2) | (BinReadRatios.ReadBinRatioDiff<=-0.2))]
-BinReadRatiosFilt.loc[BinReadRatiosFilt.ReadBinRatioDiff>=0.2, 'Cluster'] = "H"
-BinReadRatiosFilt.loc[BinReadRatiosFilt.ReadBinRatioDiff<=-0.2, 'Cluster'] = "L"
+BinReadRatiosFilt = BinReadRatios.loc[(BinReadRatios.BIN.isin(Bincluster.BIN)) & ((BinReadRatios.ReadBinRatioDiff>=MinRatioDiff) | (BinReadRatios.ReadBinRatioDiff<=-MinRatioDiff))]
+BinReadRatiosFilt.loc[BinReadRatiosFilt.ReadBinRatioDiff>=MinRatioDiff, 'Cluster'] = "H"
+BinReadRatiosFilt.loc[BinReadRatiosFilt.ReadBinRatioDiff<=-MinRatioDiff, 'Cluster'] = "L"
 
 CluCount = BinReadRatiosFilt[['READ','Cluster', 'ReadBinRatioDiff']].groupby(['READ','Cluster']).count().rename(columns={'ReadBinRatioDiff':'CluCount'}).reset_index()
 LowMet = CluCount.loc[CluCount.Cluster=="L"][['READ', 'CluCount']].rename(columns={'CluCount':'LowMet'})
@@ -122,7 +122,7 @@ McluCPGCount = MCluCPGCount.reset_index().merge(ReadMet, on='READ')
 
 McluCPGCount.loc[McluCPGCount.H_CPGCount > McluCPGCount.L_CPGCount, 'TAG'] = 'H'
 McluCPGCount.loc[McluCPGCount.H_CPGCount < McluCPGCount.L_CPGCount, 'TAG'] = 'L'
-McluCPGCount.loc[McluCPGCount.H_CPGCount < McluCPGCount.L_CPGCount, 'TAG'] = 'U'
+McluCPGCount.loc[McluCPGCount.H_CPGCount == McluCPGCount.L_CPGCount, 'TAG'] = 'U'
 
 McluCPGCount['H_CPGCount'] = McluCPGCount['H_CPGCount'].astype(int)
 McluCPGCount['L_CPGCount'] = McluCPGCount['L_CPGCount'].astype(int)
