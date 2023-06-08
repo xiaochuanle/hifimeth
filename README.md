@@ -3,9 +3,11 @@
 hifimeth is a deep neural network model for calling 5mc for PacBio HiFi reads.
 
 1. At single-molecule resolution, hifimeth achieves ~95% accuracy, F1-score over 94% and AUC over 98%
-2. Calling modification frequencies genomo-wide, hifimeth achieves correlation with BS-seq results over 0.9 with counting mode.
-3. hifimeth is built upon the [graph neural network operator](https://arxiv.org/abs/1810.02244) that implemented in the [PyG](https://pytorch-geometric.readthedocs.io/en/latest/index.html) library.
-4. A GPU accelerator is required to run hifimeth
+2. On human genome, calling modification frequencies genome-wide, hifimeth achieves correlation with BS-seq results over 0.9 with counting mode.
+3. On **plant genome of Orzya**, calling modification frequencies genome-wide, hifimeth achieves corrleation with BS-seq results 0.987 with couting mode. See [Example-Orzya](https://github.com/xiaochuanle/hifimeth/tree/master/examples-oryza).
+4. On **plant genome of Arabidopsis thaliana**, calling modification frequencies genome-wide, hifimeth achieves correlation with BS-seq results 0.956 with couting mode. See [Example-Arab](https://github.com/xiaochuanle/hifimeth/tree/master/examples-arab).
+5. hifimeth is built upon the [graph neural network operator](https://arxiv.org/abs/1810.02244) that implemented in the [PyG](https://pytorch-geometric.readthedocs.io/en/latest/index.html) library.
+6. A GPU accelerator is required to run hifimeth
 
 ## Installation
 
