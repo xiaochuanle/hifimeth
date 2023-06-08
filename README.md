@@ -16,7 +16,8 @@ Install Pytorch with the default conda channel:
 conda create -n hifimeth python=3.10
 conda activate hifimeth
 conda install cudatoolkit=11.7 -c nvidia
-pip install --force-reinstall torch=1.13.1 torchvision=0.14.1 torchaudio=0.13.1 wget https://data.pyg.org/whl/torch-1.13.0+cu117.html
+pip install --force-reinstall torch=1.13.1 torchvision=0.14.1 torchaudio=0.13.1 
+wget https://data.pyg.org/whl/torch-1.13.0+cu117.html
 pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv torch_geometric -f torch-1.13.0+cu117.html
 ```
 Or with the `tuna.tsinghua.edu.cn` channel:
@@ -25,7 +26,8 @@ conda create -n hifimeth python=3.10
 conda activate hifimeth
 conda install cudatoolkit=11.7 -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
 pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
-pip install --force-reinstall torch=1.13.1 torchvision=0.14.1 torchaudio=0.13.1 wget https://data.pyg.org/whl/torch-1.13.0+cu117.html
+pip install --force-reinstall torch=1.13.1 torchvision=0.14.1 torchaudio=0.13.1 
+wget https://data.pyg.org/whl/torch-1.13.0+cu117.html
 pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv torch_geometric -f torch-1.13.0+cu117.html
 ```
 
