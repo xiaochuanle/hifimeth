@@ -107,6 +107,8 @@ def call_5mc(args):
         del data_loader
         del data 
 
+        chunk_make_processed(features_dir, x)
+
 def main():
     parser = argparse.ArgumentParser("call 5mc")
 

@@ -169,7 +169,7 @@ function dump_usage()
 	echo ""
 	echo "USAGE:"
 	echo "${pn} [--${O_KMER_SIZE}] [--${O_THREADS}] [--${O_METH_PROB}] [--${O_UNMETH_PROB}]" 
-	echo "  <--${O_SRC}> <--${O_OUTPUT}> <--${O_INPUT}> <--${O_MODEL_PATH}>"
+	echo "  <--${O_SRC}> <--${O_OUTPUT}> <--${O_MODEL_PATH}>"
 
 	echo ""
 	echo "OPTION DESCRIPTIONS:"
@@ -185,8 +185,6 @@ function dump_usage()
 	echo "    Path to 5mc-gnn"
 	echo "--${O_OUTPUT} <path>"
 	echo "    Output directory"
-	echo "--${O_INPUT} <file>"
-	echo "    Path to sample reads (SAM, BAM)"
     echo "--${O_METH_PROB} <real>\n"
     echo "    Probability cutoff for methylation"
     echo "    Default = '${X_METH_PROB}'"

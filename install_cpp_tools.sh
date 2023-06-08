@@ -29,6 +29,8 @@ echo ${CXXFLAGS}
 echo ${CFLAGS}
 echo ${LDFLAGS}
 
+mkdir -p ${bin}
+
 echo [$(date)] build hbn_aux.o
 gcc -c ${src}/hbn_aux.c -o ${bin}/hbn_aux.o ${CFLAGS}
 
