@@ -1,6 +1,6 @@
 # Introduction
 
-hifimeth is a deep neural network model for calling 5mc for PacBio HiFi reads.
+hifimeth is a deep neural network model for calling 5mc for PacBio HiFi reads. Currently it only works on CpG motifs.
 
 1. At single-molecule resolution, hifimeth achieves ~95% accuracy, F1-score over 94% and AUC over 98%
 2. On human genome, calling modification frequencies genome-wide, hifimeth achieves correlation with BS-seq results over 0.9 with counting mode.
