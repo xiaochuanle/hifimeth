@@ -167,7 +167,6 @@ Step 3: call modification frequencies
 ``` shell
 /data1/chenying/bs3/hifimeth/src/scripts/hifimeth-freq.sh \
     --src /data1/chenying/bs3/hifimeth \
-    --model_path /data1/chenying/bs3/hifimeth/models/hifimeth-freq-s11.ckpt \
     --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
     --num_threads 48 \
     --bam 5mc-call-grch38/5mc-call.bam \
@@ -178,12 +177,9 @@ Step 3: call modification frequencies
 
 ``` shell
 freq-call-grch38/freq-call.count.txt
-freq-call-grch38/freq-call.model.txt
 ```
 
-`freq-call-grch38/freq-call.count.txt` contains calling results computed with *counting mode*.
-`freq-call-grch38/freq-call.model.txt` contains calling results computed with *model mode*.
-The two files share the same format as BS-seq (it is actually a bed file):
+`freq-call-grch38/freq-call.count.txt` shares the same format as BS-seq (it is actually a bed file):
 ```shell
 chr1	1950011	1950012	1.0000	1	0
 chr1	1950075	1950076	1.0000	1	0
@@ -191,8 +187,6 @@ chr1	1950137	1950138	1.0000	1	0
 chr1	1950262	1950263	1.0000	1	0
 chr1	1950276	1950277	1.0000	1	0
 ```
-
-Using `freq-call-grch38/freq-call.count.txt` for subsequent analysis is recommanded.
 
 ### Case 3: Calling 5mc at single-molecule resolution and calling haploid and diploid modification frequencies both
 
@@ -231,7 +225,6 @@ Step 4: calling modification frequencies on the taged bam:
 ```shell
 /data1/chenying/bs3/hifimeth/src/scripts/hifimeth-freq.sh \
     --src /data1/chenying/bs3/hifimeth \
-    --model_path /data1/chenying/bs3/hifimeth/models/hifimeth-freq-s11.ckpt \
     --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
     --num_threads 48 --bam 5mc-call-grch38/5mc-call-tag.bam \
     --out freq-call-grch38-tag \
@@ -242,9 +235,6 @@ Step 4: calling modification frequencies on the taged bam:
 
 ``` shell
 freq-call-grch38-tag/freq-call.count.txt
-freq-call-grch38-tag/freq-call.model.txt
 freq-call-grch38-tag/freq-call.hp1.count.txt
-freq-call-grch38-tag/freq-call.hp1.model.txt
 freq-call-grch38-tag/freq-call.hp2.count.txt
-freq-call-grch38-tag/freq-call.hp2.model.txt
 ```
