@@ -1,240 +1,162 @@
+# HiFiMeth (v1.1.0)
+
+![alt text](https://img.shields.io/github/v/release/xiaochuanle/hifimeth) ![alt text](https://img.shields.io/badge/Bioinformatics-PacBio%20HiFi-green) ![alt text](https://img.shields.io/badge/License-MIT-yellow.svg)
+
+- [HiFiMeth (v1.1.0)](#hifimeth-v110)
+- [Introduction](#introduction)
+- [Installation](#installation)
+    - [Option 1: Pre-compiled Binary (Most Recommended)](#option-1-pre-compiled-binary-most-recommended)
+    - [Option 2: Build from source](#option-2-build-from-source)
+    - [Option 3: Install the GPU version](#option-3-install-the-gpu-version)
+- [Usage](#usage)
+- [Model evaluation](#model-evaluation)
+
 # Introduction
 
-hifimeth is a deep neural network model for calling 5mc for PacBio HiFi reads. Currently it only works on CpG motif.
+HiFiMeth is a deep-learning-based tool specifically designed for 5mC (CpG/CHG/CHH) methylation detection using PacBio HiFi sequencing data.
 
-1. At single-molecule resolution, hifimeth achieves ~95% accuracy, F1-score over 94% and AUC over 98%
-2. On human genome, calling modification frequencies genome-wide, hifimeth achieves correlation with BS-seq results over 0.9 with counting mode.
-3. On **plant genome of Orzya**, calling modification frequencies genome-wide, hifimeth achieves corrleation with BS-seq results 0.987 with couting mode. See [Example-Orzya](https://github.com/xiaochuanle/hifimeth/tree/master/examples-oryza).
-4. On **plant genome of Arabidopsis thaliana**, calling modification frequencies genome-wide, hifimeth achieves correlation with BS-seq results 0.956 with couting mode. See [Example-Arab](https://github.com/xiaochuanle/hifimeth/tree/master/examples-arab).
-5. hifimeth is built upon the [graph neural network operator](https://arxiv.org/abs/1810.02244) that implemented in the [PyG](https://pytorch-geometric.readthedocs.io/en/latest/index.html) library.
-6. A GPU accelerator is required to run hifimeth
+🌟 Key Highlights
+* The First & Only All-Context Detector: HiFiMeth is the first and currently the only tool capable of detecting 5mC in all sequence contexts (CpG, CHG, and CHH) specifically from PacBio HiFi data.
+* Superior Accuracy & Reliability:
+  * Extensively Validated: Benchmarked across 11 diverse datasets to ensure robust performance.
+  * High Correlation with BS-seq: Demonstrates exceptional consistency with Bisulfite Sequencing (the gold standard):
+    * CHG: Genome-wide Pearson correlation reaches 0.900 – 0.973.
+    * CHH: Genome-wide Pearson correlation reaches 0.755 – 0.800, setting a new benchmark for non-CpG detection.
 
-## Installation
+* Zero Dependency & Out-of-the-box:
+  * Provided as a single pre-compiled binary executable.
+  * Zero Python dependency: The inference engine is written entirely in C/C++, eliminating complex environment configurations (no more conda or pip issues).
+* CPU-Only High Efficiency:
+  * No GPU required: Runs efficiently on standard CPU threads.
+  * Lightning-Fast Inference: Processing a 30x Arabidopsis genome (all contexts) takes only ~2 hours using 48 CPU threads.
+* Plant-Genome Friendly: Optimized for the complex methylation patterns found in plant genomes, providing high-resolution epigenetic insights where other tools fall short.
 
-### Step 1: Install the Pytorch and PyG environment
+HiFiMeth is engineered for high performance and reliability, leveraging the following libraries:
+* [htslib (v1.19.1)](https://github.com/samtools/htslib/releases/download/1.19.1/htslib-1.19.1.tar.bz2): For high-throughput and robust processing of BAM/SAM/VCF genomic data formats.
+* [OpenVINO™ (2025.4.0)](https://github.com/openvinotoolkit/openvino/tree/2025.4.0) Toolkit: A high-performance inference engine specifically optimized for Intel/AMD CPUs, enabling lightning-fast deep learning predictions without requiring a GPU.
+* [zlib (v1.3.1)](https://zlib.net/fossils/zlib-1.3.1.tar.gz): Used for efficient handling and reading of compressed .gz data streams.
 
-Install Pytorch with the default conda channel:
+***Note for Users***: Although HiFiMeth is built on these  libraries, you do not need to install them separately. Our pre-compiled binary comes with these dependencies handled (either statically linked or bundled), ensuring a true "plug-and-play" experience.
+
+# Installation
+
+We provide multiple ways to install HiFiMeth.
+
+### Option 1: Pre-compiled Binary (Most Recommended)
+This is the most straightforward way to get started. HiFiMeth requires no installation, no root privileges, and no environment setup. 
+1. Download the binary:
 ```shell
-conda create -n hifimeth python=3.10
-conda activate hifimeth
-conda install cudatoolkit=11.7 -c nvidia
-pip install --force-reinstall torch=1.13.1 torchvision=0.14.1 torchaudio=0.13.1 
-wget https://data.pyg.org/whl/torch-1.13.0+cu117.html
-pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv torch_geometric -f torch-1.13.0+cu117.html
+$ wget https://github.com/xiaochuanle/hifimeth/releases/download/v1.1.0/hifimeth_1.1.10_Linux-amd64.tar.bz2
 ```
-Or with the `tuna.tsinghua.edu.cn` channel:
+2. Extract the archive:
 ```shell
-conda create -n hifimeth python=3.10 
-conda activate hifimeth
-conda install cudatoolkit=11.7 -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
-pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
-pip install --force-reinstall torch=1.13.1 torchvision=0.14.1 torchaudio=0.13.1 
-wget https://data.pyg.org/whl/torch-1.13.0+cu117.html
-pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv torch_geometric -f torch-1.13.0+cu117.html
+$ tar -jxvf hifimeth_1.1.10_Linux-amd64.tar.bz2
+$ cd hifimeth_1.1.10_Linux-amd64/bin/
 ```
-
-### Step 2: Install `hifimeth`
-
-``` shell
-git clone https://github.com/xiaochuanle/hifimeth.git
-cd hifimeth
-./install_cpp_tools.sh
-cd ..
-```
-
-## Usage
-
-### Prepare data
-
-The `hifimeth` is downloaded in directory
+3. Add to PATH:
+To call hifimeth from any directory, add its location to your system's PATH. The most convenient way is to add it to your ~/.bashrc file:
 ```shell
-/data1/chenying/bs3/hifimeth/
+# Replace /path/to/hifimeth_directory with the actual absolute path
+export PATH=/path/to/hifimeth_directory:$PATH
 ```
 
-The reads are found in the source of `hifimeth`:
+Now you can verify the installation by typing:
 ```shell
-/data1/chenying/bs3/hifimeth/examples/chr1-reads.bam
+hifimeth
 ```
 
-Download the `GRCh38` reference (`pbmm2` does not recognise the `.fna` format):
-```shell
-$ wget ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.gz
-$ gunzip GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.gz
-$ mv GCA_000001405.15_GRCh38_no_alt_analysis_set.fna GCA_000001405.15_GRCh38_no_alt_analysis_set.fa
-$ pbmm2 index --preset CCS GCA_000001405.15_GRCh38_no_alt_analysis_set.fa GCA_000001405.15_GRCh38_no_alt_analysis_set.fa.mmi
-$ samtools faidx GCA_000001405.15_GRCh38_no_alt_analysis_set.fa
-```
+### Option 2: Build from source
 
-Download a phased VCF:
-```shell
-$ wget https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/latest/GRCh38/SupplementaryFiles/HG002_NA24385_GRCh38_1_22_v4.2_benchmark_phased_StrandSeq_whatshap.vcf.gz
-$ tabix -p vcf HG002_NA24385_GRCh38_1_22_v4.2_benchmark_phased_StrandSeq_whatshap.vcf.gz
-```
+See [build_hifimeth](build_hifimeth.md)
 
-There are three using cases.
+### Option 3: Install the GPU version
 
-### Case 1: Calling 5mc at single-molecule resolution only.
+For convinient, we also implement a GPU version of HiFiMeth with the LibTorch library. Details are found at [build_hifimeth_gpu](build_hifimeth_gpu.md)
+
+# Usage
+
+To help users rapidly familiarize themselves with HiFiMeth, we have provided a small-scale turorial dataset [P.Patens](https://github.com/xiaochuanle/hifimeth/releases/download/v1.1.0/P.patens.tar.bz2). This data originates from a 5.3 Mbp chromosome of *Physcomitrella patens*. The contents of this compressed archive encompass all inputs referenced in the command-line examples in this section and the subsequent benchmarking analysis.
 
 ```shell
-$ /data1/chenying/bs3/hifimeth/src/scripts/hifimeth.sh \
-    --src /data1/chenying/bs3/hifimeth \
-    --num_threads 48 \
-    --model_path /data1/chenying/bs3/hifimeth/models/hifimeth-mol-k400.ckpt \
-    --input /data1/chenying/bs3/hifimeth/examples/chr1-reads.bam \
-    --out 5mc-call
+$ wget https://github.com/xiaochuanle/hifimeth/releases/download/v1.1.0/P.patens.tar.bz2
+$ tar -xjvf P.patens.tar.bz2
 ```
 
-#### Results
-
+After decompressing, the directory `P.Patens` contains a shell script `run.sh`, which contains all of the commands listed here and the benchmark below:
 ```shell
-5mc-call/5mc-call.bam
-5mc-call/5mc-call.txt
+$ cd P.patens
+$ ./run.sh
 ```
 
-`5mc-call/5mc-call.bam` adds calling results to the input bam `/data1/chenying/bs3/hifimeth/examples/chr1-reads.bam`.  5mC base modification values are read from the MM and ML auxiliary tags which encode base modifications and confidence values. These tags are further described in the [SAM tag specification document](https://samtools.github.io/hts-specs/SAMtags.pdf).
-
-`5mc-call/5mc-call.txt` lists calling results in human readable format:
+We next explain the commnads in `run.sh`. HiFiMeth comprises two core modules: read-level 5mC methylation detection and genome-wide methylation quantification, which are typically executed sequentially in a standard epigenomic studies. Read-level prediction is performed via the `hifimeth call` subcommand:
 ```shell
-m64008_201124_002822/104531456/ccs	8	2	15052	0.9861
-m64008_201124_002822/104531456/ccs	8	12	15042	1.0000
-m64008_201124_002822/104531456/ccs	8	80	14974	0.0026
-m64008_201124_002822/104531456/ccs	8	170	14884	0.9995
-m64008_201124_002822/104531456/ccs	8	181	14873	0.9998
-m64008_201124_002822/104531456/ccs	8	213	14841	0.9860
-m64008_201124_002822/104531456/ccs	8	273	14781	0.9969
-m64008_201124_002822/104531456/ccs	8	281	14773	0.0308
-m64008_201124_002822/104531456/ccs	8	288	14766	0.0100
-m64008_201124_002822/104531456/ccs	8	311	14743	0.9862
+$ hifimeth call m84070_250716_151350_s2.bam mod.bam
 ```
-Each calling result ocupies one line and contains five colummns:
-1. Read name
-2. Numeric id of this read
-3. The position of this CpG in the forward strand of the read
-4. The position of this CpG in the reverse strand of the read
-5. Methylation probability.
+  
+In the above command, leveraging its OpenVINO-powered inference engine, HiFiMeth automatically detects and utilizes all available system CPU threads for parallel prediction, eliminating the need for explicit user configuration of thread counts. Furthermore, HiFiMeth automatically identifies and loads the requisite model files from its local directory by default, precluding the need for manual path specification. This high level of automation, encompassing both self-configuring CPU threading and autonomous model loading, significantly streamlines the user experience and enhances usability. By default, HiFiMeth concurrently detects three 5mC contexts (CpG, CHG, and CHH) in one single run. The resulting 5mC modification probabilities are integrated into the output BAM file (`mod.bam` in this example) using standard MM and ML tags. The “Base Modifications” section of the official SAM tags specification (https://samtools.github.io/hts-specs/SAMtags.pdf) provides a detailed description of how modifications are encoded within these two tags, ensuing full compatibility with downstream analysis tools.
 
-### Case 2: Calling 5mc at single-molecule resolution and calling modification frequencies both
-
-Step 1: map the bam to a reference:
-``` shell
-pbmm2 align --preset CCS --sort GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
-    /data1/chenying/bs3/hifimeth/examples/chr1-reads.bam chr1-reads-grch38.bam
-```
-
-Step 2: call 5mc with the mapped bam:
+To perform genome-wide quantification, the BAM file annotated with MM/ML tags is first mapped back to the reference genome with [pbmm2](https://github.com/PacificBiosciences/pbmm2). This is achieved by first indexing the reference genome and subsequently aligning the modified BAM using the index. This step ensures that the modification probabilities are mapped to specific genomic coordinates, allowing the quantification module to aggregate single-molecule modifications into genomic methylation profiles.
 ```shell
-/data1/chenying/bs3/hifimeth/src/scripts/hifimeth.sh \
-    --src /data1/chenying/bs3/hifimeth \
-    --model_path /data1/chenying/bs3/hifimeth/models/hifimeth-mol-k400.ckpt \
-    --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
-    --input chr1-reads-grch38.bam \
-    --out 5mc-call-grch38
+$ pbmm2 index –preset CCS \
+    GCA_000002425.3_Phypa_V5_genomic.fasta \
+    GCA_000002425.3_Phypa_V5_genomic.fasta.mmi
+$ pbmm2 align –preset CCS –sort -j48 \
+    GCA_000002425.3_Phypa_V5_genomic.fasta.mmi \
+    mod.bam mod.pbmm2.bam
 ```
-#### Results
 
+BAM files annotated with standard MM and ML tags, along with detailed alignment information (the CIGAR field), are then fed into the quantification module via the `hifimeth pileup` command:
 ```shell
-5mc-call-grch38/5mc-call.bam
-5mc-call-grch38/5mc-call.txt
+$ hifimeth pileup \
+    GCA_000002425.3_Phypa_V5_genomic.fasta \
+    mod.pbmm2.bam P.patens
 ```
-Details of `5mc-call-grch38/5mc-call.bam` are found in Case 1.
 
-`5mc-call-grch38/5mc-call.txt` lists calling results in human readable format:
+This command executes two primary tasks. First, it determines an adaptive probability threshold for each methylation context (CpG, CHG, or CHH) by analyzing the global distribution of modification probabilities within the input BAM file (`mod.pbmm2.bam` in this case). This threshold is used to assign a binary methylation state to each HiFi read. Second, the module calculates the site-specific methylation frequency across the genome. Specifically, for each read overlapping a target genomic locus, it is classified as methylated (M) if its modification probability exceeds the adaptive threshold, and unmethylated (U) otherwise. The methylation frequency of that locus is then determined by the formula 100.0×M/(M+U). Finally, the results are exported into three standardized BED-formatted files, categorized by sequence context (CpG, CHG, and CHH). Each BED file contains six columns, detailing the chromosome name, 0-based inclusive start position, exclusive end position, methylation frequency (%), and the respective counts of methylated and unmethylated HiFi reads overlapping the site. Here is a snapshot of `P.patens.CHH.cov.bed` (the prefix `P.patens` is specified by the above command):
 ```shell
-m64008_201124_002822/102303964/ccs      0       5069    12204   0.2486
-m64008_201124_002822/102303964/ccs      0       5079    12194   0.7334
-m64008_201124_002822/102303964/ccs      0       5097    12176   0.9999
-m64008_201124_002822/102303964/ccs      0       5129    12144   chr1    1955103 +       1.0000
-m64008_201124_002822/102303964/ccs      0       5140    12133   chr1    1955114 +       1.0000
-m64008_201124_002822/102303964/ccs      0       5142    12131   chr1    1955116 +       1.0000
-m64008_201124_002822/102303964/ccs      0       5157    12116   chr1    1955131 +       1.0000
-m64008_201124_002822/102303964/ccs      0       5161    12112   chr1    1955135 +       1.0000
-```
-Each calling result ocupies one line and contains five or eight colummns.
-Details of a calling result containing five colummns are given in Case 1. In this situation, it means that this CpG site fail to be mapped to a CpG site on the reference.
-
-A calling result containing eight colummns also contains mapping info:
-1. Read name
-2. Numeric id of this read
-3. The position of this CpG in the forward strand of the read
-4. The position of this CpG in the reverse strand of the read
-5. The chromosome name this read mapped to
-6. The chromosome position this CpG mapped to
-7. The strand (`+` for forward and `-` for reverse) of this read mapped to the reference
-8. Methylation probability
-
-Step 3: call modification frequencies
-
-``` shell
-/data1/chenying/bs3/hifimeth/src/scripts/hifimeth-freq.sh \
-    --src /data1/chenying/bs3/hifimeth \
-    --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
-    --num_threads 48 \
-    --bam 5mc-call-grch38/5mc-call.bam \
-    --out freq-call-grch38
+CM009342.2      14986   14987   69.2308 9       4
+CM009342.2      14989   14990   7.69231 1       12
+CM009342.2      14993   14994   15.3846 2       11
+CM009342.2      15006   15007   7.69231 1       12
+CM009342.2      15010   15011   0       0       13
 ```
 
-#### results
+Notably, for the strand-symmetric CpG and CHG contexts, methylated and unmethylated HiFi read counts from negative-strand guanines are aggregated with those of their corresponding positive-strand cytosines. Consequently, methylation frequencies are calculated and reported exclusively for the cytosine positions on the positive strand.
 
-``` shell
-freq-call-grch38/freq-call.count.txt
+# Model evaluation
+
+We assess the performance of HiFiMeth across three distinct dimensions using the eleven datasets. Each 5mC context is evaluated independently to facilitate a granular and exhaustive assessment of the model’s performance. In this section, we use the CHH context as a representative example to demonstrate the evaluation workflow. 
+
+First, to benchmark computational efficiency, specifically inference speed and memory usage, we execute the following command:
+```
+$ hifimeth call -c chh m84070_250716_151350_s2.bam mod.bam
 ```
 
-`freq-call-grch38/freq-call.count.txt` shares the same format as BS-seq (it is actually a bed file):
+This command isolates the detection CHH methylation while bypassing the other two contexts. Upon completion of the call, HiFiMeth automatically logs the wall-clock time and peak memory consumption.
+
+Second, to assess genome-wide quantification performance, we calculate the Pearson correlation coefficient (r) between the HiFiMeth-generated `P.patens.CHH.cov.bed` and the corresponding frequency results derived from BS-seq data. Since the `.cov` files output by Bismark utilize a 1-based coordinate system, we first convert them to the standard 0-based BED format:
 ```shell
-chr1	1950011	1950012	1.0000	1	0
-chr1	1950075	1950076	1.0000	1	0
-chr1	1950137	1950138	1.0000	1	0
-chr1	1950262	1950263	1.0000	1	0
-chr1	1950276	1950277	1.0000	1	0
+$ hifimeth cov2bed \
+    GCA_000002425.3_Phypa_V5_genomic.fasta \
+    CHH P.patens.CHH.gz.bismark.cov chh.bed
 ```
 
-### Case 3: Calling 5mc at single-molecule resolution and calling haploid and diploid modification frequencies both
-
-Step 1: map the bam to a reference:
-``` shell
-pbmm2 align --preset CCS --sort GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
-    /data1/chenying/bs3/hifimeth/examples/chr1-reads.bam chr1-reads-grch38.bam
+For the CHH context, this conversion primarily involves adjusting the chromosomal coordinates from 1-based to 0-based. For the strand-symmetric CpG and CHG contexts, the counts of methylated and unmethylated reads from reverse-strand guanines are additionally aggregated to their corresponding forward-strand cytosines. We then compute the Pearson correlation (r) between the two BED files as follows:
+```
+$ hifimeth corr P.patens.CHH.cov.bed chh.bed
 ```
 
-Step 2: call 5mc with the mapped bam:
+Finally, we evaluate the performance of HiFiMeth at the single-molecule level. Ground-truth labels are established based on methylation frequencies derived from BS-seq data, where genomic loci with a read depth of at least 5x are selected. Specifically, sites with a methylation frequency of 0% are assigned a binary label of 0 (unmethylated), while those with 100% frequency are assigned a label of 1 (methylated). Using the BAM files containing modification probabilities (MM and ML tags) and alignment metadata (CIGAR), we calculate an adaptive probability threshold as previously described. Read-level sites mapping to the labeled genomic positions are predicted as methylated if their predicted probability is greater than or equal to this threshold, and unmethylated otherwise. 
+To ensure a robust and balanced evaluation, we randomly sample 100,000 instances for each ground-truth label, repeating this process five times to generate five independent evaluation subsets:
 ```shell
-/data1/chenying/bs3/hifimeth/src/scripts/hifimeth.sh \
-    --src /data1/chenying/bs3/hifimeth \
-    --model_path /data1/chenying/bs3/hifimeth/models/hifimeth-mol-k400.ckpt \
-    --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
-    --input chr1-reads-grch38.bam \
-    --out 5mc-call-grch38
-```
-#### Results
-
-Same as Case 2.
-
-Step 3: add haplotypes to the bam:
-
-``` shell
-$ samtools index -@8 5mc-call-grch38/5mc-call.bam
-$ whatshap haplotag --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
-    --ignore-read-groups \
-    --o 5mc-call-grch38/5mc-call-tag.bam \
-    HG002_NA24385_GRCh38_1_22_v4.2_benchmark_phased_StrandSeq_whatshap.vcf.gz \
-    5mc-call-grch38/5mc-call.bam
+$ hifimeth eval \
+    GCA_000002425.3_Phypa_V5_genomic.fasta \
+    chh.bed mod.pbmm2.bam read-level.eval
 ```
 
-Step 4: calling modification frequencies on the taged bam:
-
+Performance is assessed through a confusion matrx, where True Positives (TP) and True Negatives (TN) represent correctly predicted methylated and unmethylated sites, respectively, while False Positives (FP) and False Negatives (FN) denote unmethylated sites incorrectly predicted as methylated and methylated sites incorrectly predicted as unmethylated, respectively. Based on these counts, we calculate the Precision (TP/[TP+FP]), Recall (TP/[TP+FN]), and the F1-score (2*Precision * Recall/[Precision + Recall]):
 ```shell
-/data1/chenying/bs3/hifimeth/src/scripts/hifimeth-freq.sh \
-    --src /data1/chenying/bs3/hifimeth \
-    --reference GCA_000001405.15_GRCh38_no_alt_analysis_set.fa \
-    --num_threads 48 --bam 5mc-call-grch38/5mc-call-tag.bam \
-    --out freq-call-grch38-tag \
-    --phase
+$ python read_level_eval.py read-level.eval 5
 ```
-
-#### results
-
-``` shell
-freq-call-grch38-tag/freq-call.count.txt
-freq-call-grch38-tag/freq-call.hp1.count.txt
-freq-call-grch38-tag/freq-call.hp2.count.txt
-```
+  
+The python script read_level_eval.py is provided in the torutiral data.
