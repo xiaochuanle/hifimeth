@@ -43,24 +43,16 @@ HiFiMeth is engineered for high performance and reliability, leveraging the foll
 We provide multiple ways to install HiFiMeth.
 
 ### Option 1: Pre-compiled Binary (Most Recommended)
-This is the most straightforward way to get started. HiFiMeth requires no installation, no root privileges, and no environment setup. 
-1. Download the binary:
+This is the fastest way to get started. HiFiMeth provides a standalone binary that is statically or dynamically linked with all necessary dependencies (htslib, OpenVINO, zlib). No root privileges or complex environment setups (like Conda or Python) are required.
 ```shell
 $ wget https://github.com/xiaochuanle/hifimeth/releases/download/v1.1.0/hifimeth_1.1.10_Linux-amd64.tar.bz2
-```
-2. Extract the archive:
-```shell
 $ tar -jxvf hifimeth_1.1.10_Linux-amd64.tar.bz2
-$ cd hifimeth_1.1.10_Linux-amd64/bin/
+$ cd hifimeth_1.1.10_Linux-amd64/bin
+$ echo "export PATH=\"$(pwd):\$PATH\"" >> ~/.bashrc && source ~/.bashrc
 ```
-3. Add to PATH:
-To call hifimeth from any directory, add its location to your system's PATH. The most convenient way is to add it to your ~/.bashrc file:
-```shell
-# Replace /path/to/hifimeth_directory with the actual absolute path
-export PATH=/path/to/hifimeth_directory:$PATH
-```
+The last command above adds the folder of `hifimeth` to the system `PATH`, and harcodes this to the shell configuration file `~/.bashrc`.
 
-Now you can verify the installation by typing:
+Now we can call `hifimeth` from any directory:
 ```shell
 hifimeth
 ```
