@@ -3,6 +3,9 @@
 ![alt text](https://img.shields.io/github/v/release/xiaochuanle/hifimeth) ![alt text](https://img.shields.io/badge/Bioinformatics-PacBio%20HiFi-green) ![alt text](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 - [HiFiMeth (v1.1.0)](#hifimeth-v110)
+- [Benchmarking datasets](#warning-benchmarking-datasets)
+- [:warning: CRITICAL: Required PacBio Revio Sequencing Settings for Methylation Detection](#warning-critical-required-pacbio-revio-sequencing-settings-for-methylation-detection)
+  - [Required BAM Tags:](#required-bam-tags)
 - [Introduction](#introduction)
 - [Installation](#installation)
     - [Option 1: Pre-compiled Binary (Most Recommended)](#option-1-pre-compiled-binary-most-recommended)
@@ -10,6 +13,29 @@
     - [Option 3: Install the GPU version](#option-3-install-the-gpu-version)
 - [Usage](#usage)
 - [Model evaluation](#model-evaluation)
+
+# Benchmarking datasets
+
+`hifimeth` has been comprehensively evaluated on ten plant species by comparing its 5mC (CpG/CHG/CHH) callings against those derived with BS-seq: *Arabidopsis Thaliana*, *Beta Vulgaris*, *Citrus Sinensis*, *Oryza Sativa*, *Physcomitrium Patens*, *Ricinus Communis*, *Salvia Miltiorrhiza*, *Solanum Lycopersicum*, *Solanum Tuberosum*, and *Vitis Vinifera*. To reproducing our benchmarking results, you can:
+* Download sequencing reads (in BAM format) from [GSA](https://ngdc.cncb.ac.cn/gsa/search?searchTerm=CRA037918)
+* Download reference genomes and BS-seq methylation frequency results from [zonodo](https://zenodo.org/records/19493982)
+
+With these datasets at hand, you are ready to call 5mC methylations using `hifimeth` as described in [Usage](#usage), and then evaluate the performance described in [Model evaluation](#model-evaluation)
+
+# :warning: CRITICAL: Required PacBio Revio Sequencing Settings for Methylation Detection
+
+Methylation detection using this model relies on base kinetics signal (Inter-Pulse Duration, IPD and Pulse Width, PW). These signals must be preserved and stored in the output BAM file as specific tags.
+
+By default, the PacBio Revio system <mark>DOES NOT</mark> include these kinetics tags in the HiFi BAM files to save storage space. You must manually enable this feature during run configuration:
+* Software: SMRT Link v13.0 or higher
+* Setting: Go to Data Options -> Set "Include Base Kinetics" to Yes.
+  
+## Required BAM Tags:
+The resulting BAM file must contain the following four tags for each read. Without these tags, the model will not function correctly:
+* fi: IPD (Inter-Pulse Duration) on the forward strand.
+* ri: IPD on the reverse strand.
+* fp: PW (Pulse Width) on the forward strand.
+* rp: PW on the reverse strand.
 
 # Introduction
 
